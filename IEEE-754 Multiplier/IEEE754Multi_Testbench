@@ -1,0 +1,44 @@
+`timescale 1ns / 1ps 
+ 
+module IEEE_SP_FP_Multiplier_tb; 
+    //Inputs Outputs Declarations 
+    reg [31:0] A, B; 
+ 
+    wire [31:0] Product; 
+ 
+    IEEE_SP_FP_Multiplier test(A, B, Product); 
+     
+     
+    initial begin 
+    $monitor("A = %b, B = %b, Output = %b", A, B, Product); 
+    //First wave form should be 0 
+    A = 32'b0; //0 
+    B = 32'b1; //1 
+    #100; 
+     
+    //Second wave form should be + infinity (7F800000) 
+    A = 32'b01111111100000000000000000000000; //+ inf 
+    B = 32'h5; //5 
+    #100; 
+     
+    //Third wave form should be - infinity (FF800000) 
+    A = 32'b11; //3 
+    B = 32'b11111111100000000000000000000000; //- inf 
+    #100; 
+     
+    //4th wave form should be A as A will be the NAN input 
+    A = 32'b01111111110000000000000000001111; //NAN 
+    B = 32'b01000000000000000000000000000000; //2 
+    #100; 
+     
+    //5th wave form should be B as B will be the NAN input 
+    A = 32'b01000000000000000000000000000000; //2 
+    B = 32'b01111111110000000000000000001111; //NAN 
+    #100; 
+     
+    //6th wave will be the "Normal case" 
+    A = 32'b01000000000000000000000000000000; //2 in IEE754 
+    B = 32'b01000010010110000000000000000000; //54 in IEE754 
+    #100; 
+     
+    end 
