@@ -1,0 +1,22 @@
+`timescale 1ns / 1ps 
+ 
+module T_FF(CLK, T, RST, Q, Q_N); 
+    input CLK, T, RST; 
+    output reg Q, Q_N; 
+    
+     
+    always @(posedge CLK) begin 
+        if(RST == 1) begin 
+            Q <= 0; 
+            Q_N <= 1; 
+        end 
+        if(T == 1) begin 
+            Q <= Q_N; 
+            Q_N <= Q; 
+        end 
+        if(RST == 0 && T == 0) begin 
+            Q <= Q; 
+            Q_N <= Q_N; 
+        end 
+    end 
+endmodule
