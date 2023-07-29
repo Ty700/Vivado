@@ -1,0 +1,26 @@
+`timescale 1ns / 1ps 
+ 
+module JK_FF(CLK, J, K, Q, Q_N); 
+    input CLK, J, K; 
+    output reg Q, Q_N; 
+    
+     
+    always @(posedge CLK) begin 
+        if(J == 0 && K == 0) begin 
+            Q <= Q; 
+            Q_N <= Q_N; 
+        end 
+        if(J == 0 && K == 1) begin 
+            Q <= 0; 
+            Q_N <= 1; 
+        end 
+        if(J == 1 && K == 0) begin 
+            Q <= 1; 
+            Q_N <= 0; 
+        end 
+        if(J == 1 && K == 1) begin 
+            Q <= Q_N; 
+            Q_N <= Q; 
+        end 
+    end 
+endmodule
