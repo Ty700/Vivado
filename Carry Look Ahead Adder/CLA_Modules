@@ -15,10 +15,8 @@ module CLA_Logic(G, P, Cin, Carry, Cout);
      
     assign Carry[0] = G[0] || (P[0] && Cin); 
     assign Carry[1] = G[1] || (P[1] && G[0]) || (P[1] && P[0] && Cin); 
-    assign Carry[2] = G[2] || (P[2] && G[1]) || (P[2] && P[1] && G[0]) || (P[2] 
-&& P[1] && P[0] && Cin); 
-    assign Cout = G[3] || (P[3] && G[2]) || (P[3] && P[2] && G[1]) || (P[3] 
-&& P[2] && P[1] && G[0]) || (P[3] && P[2] && P[1] && P[0] && Cin); 
+    assign Carry[2] = G[2] || (P[2] && G[1]) || (P[2] && P[1] && G[0]) || (P[2] && P[1] && P[0] && Cin); 
+    assign Cout = G[3] || (P[3] && G[2]) || (P[3] && P[2] && G[1]) || (P[3] && P[2] && P[1] && G[0]) || (P[3] && P[2] && P[1] && P[0] && Cin); 
 endmodule 
  
 module CLA_4Bit(A, B, Cin, Sum, Cout); 
