@@ -1,0 +1,29 @@
+module JK_FF_tb(); 
+    reg CLK, J, K; 
+    wire Q, Q_N; 
+     
+    JK_FF test(CLK, J, K, Q, Q_N); 
+ 
+    initial begin 
+        CLK = 1'b0; //We need to give CLK an initial value first before being able 
+to invert it 
+        forever begin 
+            #10; 
+            CLK = !CLK; //This will generate a positive edge every 10ns 
+        end 
+    end 
+     
+    initial begin 
+        $monitor("J = %b, K = %b, Q = %b, Q_N = %b", J, K, Q, Q_N); 
+        J = 1'b1; 
+        K = 1'b0; 
+        #100; 
+        K = !K; 
+        #120; 
+        J = !J; 
+        K = !K; 
+        #100; 
+        K = !K; 
+        #100; 
+    end 
+endmodule
