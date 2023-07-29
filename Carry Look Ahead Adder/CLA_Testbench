@@ -9,8 +9,7 @@ module CLA_4bit_Test();
     CLA_4Bit test(A, B, Cin, S, Cout); 
          
     initial begin 
-        $monitor("A = %b, B = %b, C_in = %b, C_out = %b, Sum = %b", A, B, Cin, 
-Cout, S); 
+        $monitor("A = %b, B = %b, C_in = %b, C_out = %b, Sum = %b", A, B, Cin, Cout, S); 
          
         A = 4'b0110; 
         B = 4'b0011; 
