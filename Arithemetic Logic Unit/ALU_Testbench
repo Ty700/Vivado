@@ -1,0 +1,34 @@
+`timescale 1ns / 1ps   
+ 
+module ALU_4bit_tb; 
+//Inputs 
+ reg[3:0] A,B; 
+ reg[2:0] Sel; 
+ reg Cin; 
+ 
+//Outputs 
+ wire[3:0] Output; 
+ wire Cout; 
+ integer i; 
+ ALU_4bit test_unit(A, B, Sel, Cin, Cout, Output); 
+  
+    initial begin 
+      A = 4'b0111;  //7 
+      B = 4'b0010;  //2 
+      Sel = 3'b000; 
+      Cin = 1'b0; 
+      #100; 
+      $monitor("Sel = %b, A = %b, B = %b, Output = %b, Cin = %b, Cout = %b", 
+Sel, A, B, Output, Cin, Cout); 
+       
+      for (i=0;i<=7;i=i+1) 
+      begin 
+      if(i == 0) 
+        Sel = Sel; //Without this it would output Sel = 000 at the very bottom 
+for some reason??? Couldn't figure out why but this fixed it. 
+      else 
+       Sel = Sel + 3'b001; 
+       #100; 
+      end;      
+    end 
+endmodule
