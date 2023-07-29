@@ -1,0 +1,67 @@
+`timescale 1ns / 1ps 
+module IEEE_SP_FP_Multiplier(A, B, Product, A_MantissaMult, B_MantissaMult); 
+
+    input [31:0] A, B; 
+    output reg [31:0] Product; 
+    output reg [23:0] B_MantissaMult, A_MantissaMult; 
+     
+    //Exponent and Mantissa Wire Declarations
+    wire [7:0] A_Exponent, B_Exponent; 
+    wire [22:0] A_Mantissa, B_Mantissa; 
+    wire [23:0] A_MantissaMult, B_MantissaMult; 
+     
+    assign A_Exponent = A[30:23]; 
+    assign B_Exponent = B[30:23]; 
+    assign A_Mantissa = {1'b1, A[22:0]}; 
+    assign B_Mantissa = {1'b1, B[22:0]}; 
+    assign A_MantissaMult[22:0] = A[22:0]; 
+    assign B_MantissaMult[22:0] = B[22:0]; 
+    assign A_MantissaMult[23] = 1'b1; 
+    assign B_MantissaMult[23] = 1'b1; 
+     
+    //Temporary Reg For Holding Mantissa Multiplication Result 
+    reg [47:0] Mantissa_Result; 
+ 
+    always @(*) begin 
+
+        Product[31] = A[31] ^ B[31]; 
+
+        //Either A or B is zero 
+        if((A_Exponent == 8'h00 && A_Mantissa == 23'h000000) || (B_Exponent == 8'h00 && B_Mantissa == 23'h000000)) begin 
+            Product = 1'b0; 
+        end 
+         
+        //Either A or B is infinity 
+        else if((A[31] == 0 && A_Exponent == 8'hFF && A_Mantissa == 23'h000000) || (B[31] == 0 && B_Exponent == 8'hFF && B_Mantissa == 23'h000000)) begin 
+            Product = 32'h7F800000; //7F800000 = +inf 
+        end 
+         
+        else if((A[31] == 1 && A_Exponent == 8'hFF && A_Mantissa == 23'h000000) || (B[31] == 1 && B_Exponent == 8'hFF && B_Mantissa == 23'h000000)) begin 
+            Product = 32'hFF800000; //FF800000 = -inf 
+        end 
+         
+        //Either A or B is NaN 
+        else if(A_Exponent == 8'hFF && A_Mantissa != 23'h000000) begin 
+            Product = A; 
+        end 
+        else if (B_Exponent == 8'hFF && B_Mantissa != 23'h000000) begin 
+            Product = B; 
+        end 
+                 
+        else begin 
+            Mantissa_Result = A_MantissaMult * B_MantissaMult; 
+             
+            if(Mantissa_Result[47] == 1) begin
+                Product[30:23] = A_Exponent + B_Exponent - 126; 
+                
+                Product[22:0] = Mantissa_Result[46:24]; 
+            end 
+            else begin 
+                
+                Product[30:23] = A_Exponent + B_Exponent - 127; 
+                
+                Product[22:0] = Mantissa_Result[45:23]; 
+            end 
+        end 
+    end     
+endmodule
