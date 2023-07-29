@@ -1,0 +1,28 @@
+module D_FF(Clk, D, Set, Rst, Q, Q_N); 
+    input Clk, D, Set, Rst; 
+    output reg Q, Q_N; 
+    always @(posedge Clk) begin 
+        if(Rst)begin 
+            Q <= 1'b0; 
+            Q_N <= 1'b1; 
+        end 
+        else if(Set) begin 
+            Q <= 1'b1; 
+            Q_N <= 1'b0; 
+        end 
+        else begin     
+            Q <= D; 
+            Q_N <= ~D; 
+        end 
+    end 
+endmodule 
+ 
+module ringCounter(Clk, Rst, Q); 
+    input Clk, Rst; 
+    output [3:0] Q; 
+     
+    D_FF F0(.Clk(Clk), .D(Q[1]), .Set(), .Rst(Rst), .Q(Q[0]), .Q_N()); //Q0 
+    D_FF F1(.Clk(Clk), .D(Q[2]), .Set(), .Rst(Rst), .Q(Q[1]), .Q_N()); //Q1 
+    D_FF F2(.Clk(Clk), .D(Q[3]), .Set(), .Rst(Rst), .Q(Q[2]), .Q_N()); //Q2 
+    D_FF F3(.Clk(Clk), .D(Q[0]), .Set(Rst), .Rst(), .Q(Q[3]), .Q_N()); //Q3 
+endmodule
