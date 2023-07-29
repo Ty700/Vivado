@@ -1,0 +1,26 @@
+`timescale 1ns / 1ps 
+module RingCounter_tb; 
+    reg Clk, Set, Rst; 
+    wire [3:0]Q; 
+     
+    //inputs as follows: CLK, D, Set, Rst, Q, and !Q 
+    ringCounter test(Clk, Rst, Q); 
+     
+    initial begin //Clock setup 
+        Clk = 1'b0; 
+        forever begin 
+            #10; 
+            Clk = !Clk; 
+        end 
+    end   
+     
+    initial begin 
+    #10; 
+    $monitor("Rst=%b, Q=%b", Rst, Q); 
+    Rst = 1'b1; 
+    #100; 
+    Rst = 1'b0; 
+    #120; //Want to stop it before 0001 to show actual reset. 
+    Rst = 1'b1;     
+    end        
+endmodule
