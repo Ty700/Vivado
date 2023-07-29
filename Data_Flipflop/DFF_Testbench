@@ -5,8 +5,7 @@ module D_FF_tb();
     D_FF test(CLK, D, RST, Q, Q_N); 
     integer i; 
     initial begin 
-        CLK = 1'b0; //We need to give CLK an initial value first before being able 
-to invert it 
+        CLK = 1'b0; //We need to give CLK an initial value first before being able to invert it 
         forever begin 
             #10; 
             CLK = !CLK; //This will generate a positive edge every 10ns 
