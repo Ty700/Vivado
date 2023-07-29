@@ -1,0 +1,28 @@
+module Array_Multiplier(A, B, Product); 
+    //This will control how many bits wide our multiplier is 
+    parameter width = 4; 
+        
+    //Inputs and Outputs Declarations 
+    input [(width-1):0] A, B; 
+    output reg [((width*2)-1):0] Product; 
+     
+     
+    //Partial Product reg Declaration 
+    reg [((width*2)-2):0] PP [(width-1):0]; 
+    reg [((width*2)-1):0] P; 
+     
+    //Producing Partial Product Values 
+    integer i,j; 
+    always @(*)begin 
+        for(i = 0; i < width; i = i + 1)begin 
+            PP[i] = B[i] ? A : 0; 
+            PP[i] = PP[i] << i;      
+        end         
+         
+        P = 0; 
+        for(j = 0; j < width; j = j + 1)begin 
+            P = P + PP[j]; 
+        end 
+        Product = P; 
+    end 
+endmodule 
