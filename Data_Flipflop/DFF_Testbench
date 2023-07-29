@@ -1,0 +1,25 @@
+module D_FF_tb(); 
+    reg CLK, D, RST; 
+    wire Q, Q_N; 
+     
+    D_FF test(CLK, D, RST, Q, Q_N); 
+    integer i; 
+    initial begin 
+        CLK = 1'b0; //We need to give CLK an initial value first before being able 
+to invert it 
+        forever begin 
+            #10; 
+            CLK = !CLK; //This will generate a positive edge every 10ns 
+        end 
+    end 
+     
+    initial begin 
+        $monitor("D = %b, RST = %b, Q = %b, Q_N = %b", D, RST, Q, Q_N); 
+            D = 1'b0; 
+            RST = 1'b0; 
+        for(i = 0; i < 4; i = i+1) begin  
+            #100; 
+            {RST, D} = {RST, D} + 1; 
+        end 
+    end 
+endmodule
