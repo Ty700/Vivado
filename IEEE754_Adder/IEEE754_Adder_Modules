@@ -1,0 +1,105 @@
+`timescale 1ns / 1ps
+
+module IEEE_SP_FP_Adder(A, B, Sum);
+//Input Output Declarations
+    input [31:0] A, B;
+    output [31:0] Sum;
+    //Reg Declarations To Break up A and B components
+    reg A_Sign, B_Sign;
+    reg [7:0] A_Exponent, B_Exponent;
+    reg [23:0] A_Mantissa, B_Mantissa; //<- 24-bits wide to account for implied one
+    
+    //Regs to Get Correct Sum Bits(This is just for convinence of naming, we'll use them in the always block)
+    reg S_Sign;
+    reg [7:0] S_Exponent;
+    reg [22:0] S_Mantissa;
+    
+    //Assign S_Sign, S_Exponent, and S_Mantissa to Correct Sum bits
+    assign Sum[31] = S_Sign;
+    assign Sum[30:23] = S_Exponent;
+    assign Sum[22:0] = S_Mantissa;
+    
+    reg [31:0] Exp_Difference; //<- Reg to hold difference between exponents (How much to shift B_Mantissa)
+    reg [24:0] Mantissa_Result; //<- Reg to hold result from adding or subtracting mantissas(Think about WHY this is 25-bits)
+    
+    //We want the A regs (A_Sign, A_Exponent, A_Mantissa) to correspond to the greater magnitude input to make code easier
+    //Non-Blocking assignments are probably best for this always block(why?)
+    always @(*) begin
+    
+    //Check if B's exponent bits are greater than A's
+    if(B[30:23] > A[30:23]) begin
+        //Fill A regs(A_Sign, A_Exponent, A_Mantissa) with B's bits (Don't forget implied 1 for mantissa)
+        A_Sign = B[31];
+        A_Exponent = B[30:23];
+        A_Mantissa = {1'b1, B[22:0]};
+        //Fill B regs(B_Sign, B_Exponent, B_Mantissa) with A's bits (Don't forget implied 1 for mantissa)
+        B_Sign = A[31];
+        B_Exponent = A[30:23];
+        B_Mantissa = {1'b1, A[22:0]};
+    end
+    
+    //Else check if exponent bits are the same and B's mantissa bits are greater than A's
+    else if((B[30:23] == A[30:23]) && (B[22:0] > A[22:0])) begin
+        //Fill A regs(A_Sign, A_Exponent, A_Mantissa) with B's bits (Don't forget implied 1 for mantissa)
+        A_Sign = B[31];
+        A_Exponent = B[30:23]; //Redundant code since they already equal each other? Not sure putting just in case
+        A_Mantissa = {1'b1, B[22:0]};
+        //Fill B regs(B_Sign, B_Exponent, B_Mantissa) with A's bits (Don't forget implied 1 for mantissa)
+        B_Sign = A[31];
+        B_Exponent = A[30:23]; //Redundant code since they already equal each other? Not sure putting just in case
+        B_Mantissa = {1'b1, A[22:0]};
+    end
+    //Else since the prior conditions are false that means A's magnitude is greater than B already
+    else begin
+        //Fill A regs(A_Sign, A_Exponent, A_Mantissa) with A's bits (Don't forget implied 1 for mantissa)
+        A_Sign = A[31];
+        A_Exponent = A[30:23];
+        A_Mantissa = {1'b1, A[22:0]};
+        //Fill B regs(B_Sign, B_Exponent, B_Mantissa) with B's bits (Don't forget implied 1 for mantissa)
+        B_Sign = B[31];
+        B_Exponent = B[30:23];
+        B_Mantissa = {1'b1, B[22:0]};
+    end
+end
+//Since the previous always block will ensure the A regs values will correspond to the greater magnitude input
+//we can find the result fairly straight forward.
+//Blocking assignments are probably better for this always block(why?)
+    always @(*) begin
+        //Calculate the number of times we will need to shift B's mantissa(remember we defined a reg to hold this value)
+        //Then shift the mantissa by this value (left shift or right shift??? Think about this!)
+        
+        Exp_Difference = A_Exponent - B_Exponent;
+        
+        if(Exp_Difference > 0) begin
+            B_Mantissa = B_Mantissa >> Exp_Difference; //shr if +
+        end else begin
+            B_Mantissa = B_Mantissa << Exp_Difference; //shl if +
+        end
+        
+        //If the signs are the same, then add the mantissas. Otherwise, subtract the mantissas
+        if(A_Sign == B_Sign) begin
+            Mantissa_Result = A_Mantissa + B_Mantissa;
+        end
+        
+        else begin
+            Mantissa_Result = A_Mantissa - B_Mantissa;
+        end
+        
+        //Check if the most significant bit of Mantissa_Result is a one(needs normalization)
+        if(Mantissa_Result[24] == 1'b1) begin
+            //Give S_Mantissa the correct bits from Mantissa_Result
+            S_Mantissa = Mantissa_Result[23:1];
+            //Give S_Exponent A's exponent + 1
+            S_Exponent = A_Exponent + 1;
+        end
+        //Else (no normalization needed)
+        else begin
+            //Give S_Mantissa the correct bits from Mantissa_Result
+            S_Mantissa = Mantissa_Result[22:0];
+            //Give S_Exponent A's exponent
+            S_Exponent = A_Exponent;
+        end
+            //S_Sign should correspond to A_Sign since A is the greater magnitude input
+            S_Sign = A_Sign;
+     end
+endmodule
